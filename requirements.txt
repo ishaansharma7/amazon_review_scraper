@@ -2,7 +2,6 @@ envparse
 Flask
 Flask-And-Redis
 flask-mongoengine
-Flask-MySQLdb
 flask-paginate
 Flask-SQLAlchemy
 Flask-WTF
@@ -14,6 +13,5 @@ six
 SQLAlchemy
 Werkzeug
 WTForms
-psycopg2
 psycopg2-binary
 mongoengine
