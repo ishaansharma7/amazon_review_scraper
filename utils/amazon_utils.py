@@ -11,3 +11,8 @@ def get_review_url(product_url, page_number=1):
 
 def get_date_time_object(date_str):
     return parse(date_str)
+
+
+def date_from_date_span_text(date_str):
+    date_str = date_str.split(' on ')[-1]
+    return parse(date_str)

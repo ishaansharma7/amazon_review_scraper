@@ -10,4 +10,5 @@ review_div = soup.find("div", {"id": "cm_cr-review_list"})
 review_div_list = review_div.find_all("div", {"class": "a-section review aok-relative"})
 for each in review_div_list:
     date_span = each.find("span", {"data-hook":"review-date"})
-    print(date_span.prettify())
+    print(each.text)
+    print()
