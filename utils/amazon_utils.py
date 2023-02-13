@@ -1,6 +1,7 @@
 import re
 from dateutil.parser import parse
 from datetime import datetime, timedelta
+from utils.es_utils import get_last_date
 
 
 def get_review_url(product_url, page_number=1):
@@ -19,18 +20,16 @@ def get_date_time_object(date_str):
 def get_start_date():
     one_day_before =  (datetime.now() - timedelta(days=1)).date()
     one_day_before = datetime.combine(one_day_before, datetime.min.time())
-    print('one_day_before:', one_day_before)
     return one_day_before
 
-def get_end_date(date_str):
+def get_end_date(date_str=None, campaign_id=None):
     if date_str:
         return parse(date_str)
-    last_date_db = None     # here get last review date from ES
+    last_date_db = get_last_date(campaign_id)     # here get last review date from ES
     if last_date_db:
         return last_date_db
-    six_days_bef_date = (datetime.now() - timedelta(days=6)).date()
+    six_days_bef_date = (datetime.now() - timedelta(days=20)).date()
     six_days_bef_date = datetime.combine(six_days_bef_date, datetime.min.time())
-    print('six_days_bef_date:', six_days_bef_date)
     return six_days_bef_date
 
 

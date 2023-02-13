@@ -2,9 +2,6 @@ from utils.es_utils import insert_into_es
 from uuid import uuid4
 
 def insert_data_in_db(scraped_data, campaign_id):
-    print()
-    print()
-    print()
     es_bulk_data = []
     # print(scraped_data)
     for each_rec in scraped_data:

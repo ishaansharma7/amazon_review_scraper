@@ -7,16 +7,18 @@ import time
 import traceback
 
 
-def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_id=None):
+def scrape_procedure(product_url=None, end_date=None, campaign_id=None):
     """
     Start the scraping procedure with vital data like product url,
-    start & end date.
+    campaign_id.
     Adds meta data to scraped data before inserting into db
     """
     start_date = get_start_date()
-    end_date = get_end_date(end_date)
+    end_date = get_end_date(end_date, campaign_id)
+    print(start_date, type(start_date))
+    print(end_date, type(end_date))
     scraped_data = get_review_data(product_url ,start_date, end_date)
-    # insert_data_in_db(scraped_data, campaign_id)
+    insert_data_in_db(scraped_data, campaign_id)
 
 
 def get_review_data(product_url=None, start_date=None, end_date=None):
@@ -94,15 +96,5 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
 
         return data_list, current_date
     except Exception:
-        traceback.print_exc()
+        # traceback.print_exc()
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)
-
-    
-    # for images  a-section a-spacing-medium review-image-container
-    # for videos  vse-airy-container vse-player-container
-    # username genome-widget
-
-
-
-# from data.amazon_review_scrape import scrape_procedure
-# '2022-12-31', '2022-12-01'
