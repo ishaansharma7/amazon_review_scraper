@@ -6,6 +6,7 @@ application = create_app()
 import time
 from scripts.test_script import hello_world
 from data.amazon_review_scrape import scrape_procedure
+from utils.es_utils import insert_into_es
 
 
 @application.cli.command('test_cmd')
@@ -18,3 +19,8 @@ def scrape_amazon():
    start_date = '2023-02-08'
    end_date = '2022-12-10'
    scrape_procedure(product_url, start_date, end_date)
+
+
+@application.cli.command('insert_data')
+def insert_data():
+   insert_into_es()

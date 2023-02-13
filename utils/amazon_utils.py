@@ -66,3 +66,14 @@ def get_variant_info(review_html):
     except Exception:
         print('review score extraction failed ----')
     return None
+
+
+def get_images_links(review_html):
+    try:
+        variant_html = review_html.find("a", {"data-hook":"format-strip"})
+        variant_text = variant_html.text.strip()
+        variant_text = variant_text.replace('\n', '')
+        return variant_text
+    except Exception:
+        print('review score extraction failed ----')
+    return None

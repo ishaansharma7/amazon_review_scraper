@@ -5,9 +5,10 @@ get_review_title, get_review_body, get_review_score, get_variant_info)
 from utils.review_db_utils import insert_data_in_db
 import time
 import traceback
+import uuid
 
 
-def scrape_procedure(product_url=None, start_date=None, end_date=None):
+def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_id=None):
     """
     Start the scraping procedure with vital data like product url,
     start & end date.
@@ -16,7 +17,7 @@ def scrape_procedure(product_url=None, start_date=None, end_date=None):
     start_date = get_date_time_object(start_date)
     end_date = get_date_time_object(end_date)
     scraped_data = get_review_data(product_url ,start_date, end_date)
-    insert_data_in_db(scraped_data)
+    insert_data_in_db(scraped_data, campaign_id)
 
 
 def get_review_data(product_url=None, start_date=None, end_date=None):
@@ -72,7 +73,7 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
             variant_info = get_variant_info(each)
             verified_purchase = True if each.find("span", {"data-hook":"avp-badge"}) else False
             review_date = current_date
-            data_list.append({
+            collected_data = {
                 'reviewer_name': reviewer_name,
                 'review_title': review_title,
                 'review_text': review_text,
@@ -81,7 +82,8 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
                 'review_date': review_date,
                 'review_score': review_score,
                 'variant_info': variant_info,
-            })
+            }
+            data_list.append(collected_data)
             print('reviewer:', name_span.text)
             print('title:', review_title)
             print('body:', review_text)
