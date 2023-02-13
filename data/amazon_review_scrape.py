@@ -1,11 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from utils.amazon_utils import (get_date_time_object, get_review_url, date_from_date_span_text,
-get_review_title, get_review_body, get_review_score, get_variant_info)
+get_review_title, get_review_body, get_review_score, get_variant_info, get_start_date, get_end_date)
 from utils.review_db_utils import insert_data_in_db
 import time
 import traceback
-import uuid
 
 
 def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_id=None):
@@ -14,10 +13,10 @@ def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_
     start & end date.
     Adds meta data to scraped data before inserting into db
     """
-    start_date = get_date_time_object(start_date)
-    end_date = get_date_time_object(end_date)
+    start_date = get_start_date()
+    end_date = get_end_date(end_date)
     scraped_data = get_review_data(product_url ,start_date, end_date)
-    insert_data_in_db(scraped_data, campaign_id)
+    # insert_data_in_db(scraped_data, campaign_id)
 
 
 def get_review_data(product_url=None, start_date=None, end_date=None):
@@ -95,7 +94,7 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
 
         return data_list, current_date
     except Exception:
-        # traceback.print_exc()
+        traceback.print_exc()
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)
 
     
