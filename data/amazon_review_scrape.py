@@ -7,14 +7,15 @@ import time
 import traceback
 
 
-def scrape_procedure(product_url=None, end_date=None, campaign_id=None):
+
+def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_id=None):
     """
     Start the scraping procedure with vital data like product url,
     campaign_id.
     Adds meta data to scraped data before inserting into db
     """
-    start_date = get_start_date()
-    end_date = get_end_date(end_date, campaign_id)
+    start_date = get_date_time_object(start_date) if start_date else get_start_date()
+    end_date = get_date_time_object(end_date) if end_date else get_end_date(end_date, campaign_id)
     print(start_date, type(start_date))
     print(end_date, type(end_date))
     scraped_data = get_review_data(product_url ,start_date, end_date)
@@ -41,10 +42,12 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
         print('current_date:', current_date, ', page_number:', page_number)
         print()
         print('************************')
+        time.sleep(5)
+        
     return scraped_data
 
 
-def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
+def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
     if retry < 1:
         print('retry over ----')
         return [], None
@@ -97,4 +100,5 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=6):
         return data_list, current_date
     except Exception:
         # traceback.print_exc()
+        time.sleep(5)
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)
