@@ -57,6 +57,7 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         review_score = None
         review_date = None
         verified_purchase = None
+        review_title = None
         current_date = None
         data_list = []
         page = requests.get(review_url)
