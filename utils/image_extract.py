@@ -21,6 +21,11 @@ def read_image(filename=None, img_link=None):
     }
     if not img_link:
         image = cv2.imread(filename)
+        gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        (thresh, bw_img) = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+        image = bw_img
+
+
     else:
         response = requests.get(img_link)
         if response.status_code != 200:
@@ -28,6 +33,8 @@ def read_image(filename=None, img_link=None):
             print('image download failed ---')
             return ex_da
         image = Image.open(io.BytesIO(response.content))
+        bw_img = image.convert('L')
+        image = bw_img
 
     data_eng = pytesseract.image_to_string(image, lang='eng')
     # print(data_eng)
@@ -87,7 +94,7 @@ def verify_extracted_data(data_eng, ex_da):
     
 
 def initial_keyword_check(data_eng):
-    if 'Reviewed in India' in data_eng and 'Thank you for your review' in data_eng:
+    if 'Reviewed in India' in data_eng and 'Thank you for your review' in data_eng and 'Verified Purchase' in data_eng:
         return True
     return False
 
