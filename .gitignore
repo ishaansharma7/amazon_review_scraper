@@ -25,3 +25,4 @@ config/staging.cfg
 env/
 __pycache__
 test_folder
+*.csv

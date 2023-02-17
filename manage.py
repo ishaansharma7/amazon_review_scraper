@@ -9,6 +9,7 @@ from data.amazon_review_scrape import scrape_procedure
 from utils.es_utils import insert_into_es
 from utils.image_extract import read_image
 import click
+import csv
 
 
 @application.cli.command('test_cmd')
@@ -28,6 +29,38 @@ def insert_data():
 
 
 @application.cli.command('image_test')
+def image_test():
+   images_data = []
+   cols = [
+      'reviewer_name',
+      'review_title',
+      'review_text',
+      'verified_purchase',
+      'thanks_message',
+      'edit_button',
+      'delete_button',
+      'valid_review',
+      'img_link',
+   ]
+   with open('images_link.csv') as f:
+      reader = csv.reader(f)
+      for idx, row in enumerate(reader):
+         image_url, filename = row
+         print('current:-', idx)
+         images_data.append(read_image(img_link=image_url))
+   
+
+   with open('ocr_output.csv', 'w', newline='') as f:
+      writer = csv.DictWriter(f, fieldnames=cols)
+      
+      # Write the column headers to the first row
+      writer.writeheader()
+      
+      # Write each dictionary as a row in the CSV file
+      for d in images_data:
+         writer.writerow(d)
+
+@application.cli.command('single_test')
 @click.option('--loc')
-def image_test(loc):
-   read_image(loc)
+def single_test(loc):
+   read_image(filename=loc)

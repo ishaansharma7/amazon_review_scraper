@@ -2,12 +2,12 @@ import cv2
 import pytesseract
 import traceback
 import json
+import requests
+import io
+from PIL import Image
+import time
 
-def read_image(filename):
-    image = cv2.imread(filename)
-    data_eng = pytesseract.image_to_string(image, lang='eng')
-    # print(data_eng)
-    data_eng = clean_extracted_text(data_eng)
+def read_image(filename=None, img_link=None):
     ex_da = {                   # extracted data
         'reviewer_name': None,
         'review_title': None,
@@ -16,8 +16,26 @@ def read_image(filename):
         'thanks_message': None,
         'edit_button': None,
         'delete_button': None,
+        'valid_review': False,
+        'img_link': img_link,
     }
+    if not img_link:
+        image = cv2.imread(filename)
+    else:
+        response = requests.get(img_link)
+        if response.status_code != 200:
+            print('response.status_code', response.status_code)
+            print('image download failed ---')
+            return ex_da
+        image = Image.open(io.BytesIO(response.content))
+
+    data_eng = pytesseract.image_to_string(image, lang='eng')
+    # print(data_eng)
+    data_eng = clean_extracted_text(data_eng)
     verify_extracted_data(data_eng, ex_da)
+    # time.sleep(0.5)
+    print('###############################')
+    return ex_da
 
 
 def verify_extracted_data(data_eng, ex_da):
@@ -60,6 +78,7 @@ def verify_extracted_data(data_eng, ex_da):
     ex_da['thanks_message'] = True if 'Thank you for your review' in data_eng else False
     ex_da['edit_button'] = True if 'Edit Delete' in data_eng else False
     ex_da['delete_button'] = True if 'Edit Delete' in data_eng else False
+    ex_da['valid_review'] = True
     print()
     print()
     print()
