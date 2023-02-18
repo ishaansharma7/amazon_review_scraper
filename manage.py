@@ -7,7 +7,7 @@ import time
 from scripts.test_script import hello_world
 from data.amazon_review_scrape import scrape_procedure
 from utils.es_utils import insert_into_es
-from utils.image_extract import read_image
+from data.image_extract import read_image
 import click
 import csv
 
@@ -63,4 +63,4 @@ def image_test():
 @application.cli.command('single_test')
 @click.option('--loc')
 def single_test(loc):
-   read_image(filename=loc)
+   read_image(filename=loc, campaign_id=1004)
