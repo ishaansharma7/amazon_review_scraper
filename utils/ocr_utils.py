@@ -9,7 +9,7 @@ from utils.connection_utils import getElasticSearchClient
 def prepare_image(filename, img_link):
     """
     get image either locally or by image link,
-    also returns B&W image
+    also returns B&W image and a boolean success
     """
     try:
         if not img_link:
@@ -22,14 +22,14 @@ def prepare_image(filename, img_link):
             if response.status_code != 200:
                 print('response.status_code', response.status_code)
                 print('image download failed ---')
-                return None
+                return None, False
             image = Image.open(io.BytesIO(response.content))
             bw_img = image.convert('L')
             image = bw_img
-        return image
+        return image, True
     except Exception:
         traceback.print_exc()
-    return None
+    return None, False
 
 
 def extract_data(data_eng, ex_da):
@@ -78,10 +78,46 @@ def extract_data(data_eng, ex_da):
     ex_da['delete_button'] = True if 'Edit Delete' in data_eng else False
     ex_da['valid_review'] = True
 
-    print('\n\n\n\n')
-    print(json.dumps(ex_da, indent=5))
-
     
+
+def match_from_db(ex_da):
+    query = {
+    "query": {
+        "bool": {
+        "must": [
+            {
+            "term": {
+                "campaign_id": ex_da['campaign_id']
+            }
+            },
+            {
+            "query_string": {
+                "query": ex_da['review_title'],
+                "default_field": "review_title"
+            }
+            },
+            {
+            "query_string": {
+                "query": ex_da['review_text'],
+                "default_field": "review_text"
+            } 
+            }
+        ]
+        }
+    }
+    }
+    es = getElasticSearchClient()
+    print()
+    print(json.dumps(query, indent=2))
+    es_res = es.search(index='user_reviews', body=query)
+    print('max_score:',  es_res['hits'].get('max_score'))
+    if not es_res['hits']['max_score'] or es_res['hits'].get('max_score', 1) < 90:
+        return
+    ex_da['found_rec'] = True
+    ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
+    print()
+    # print(es_res)
+
 
 def initial_keyword_check(data_eng):
     """

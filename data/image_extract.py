@@ -1,6 +1,7 @@
-from utils.ocr_utils import prepare_image, clean_extracted_text, extract_data
+from utils.ocr_utils import prepare_image, clean_extracted_text, extract_data, match_from_db
 import pytesseract
 import traceback
+import json
 
 
 def read_image(filename=None, img_link=None, product_url='', campaign_id=1000):
@@ -16,19 +17,25 @@ def read_image(filename=None, img_link=None, product_url='', campaign_id=1000):
         'edit_button': None,
         'delete_button': None,
         'valid_review': False,
+        'found_rec': False,
+        'matched_rec': None,
         'img_link': img_link,
-        'matched_data': None,
         'campaign_id': campaign_id,
     }
+    try:
+        image, success = prepare_image(filename, img_link)
+        if not success:   return ex_da
 
-    image = prepare_image(filename, img_link)
-    # if not image:   return ex_da
+        data_eng = pytesseract.image_to_string(image, lang='eng')
+        data_eng = clean_extracted_text(data_eng)
 
-    data_eng = pytesseract.image_to_string(image, lang='eng')
-    data_eng = clean_extracted_text(data_eng)
+        extract_data(data_eng, ex_da)
+        match_from_db(ex_da)
 
-    extract_data(data_eng, ex_da)
+        print('\n\n\n\n')
+        print(json.dumps(ex_da, indent=5))
+        print('###############################')
 
-
-    print('###############################')
+    except Exception:
+        traceback.print_exc()
     return ex_da
