@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from flask import current_app
 from main import create_app
 import os
-application = create_app()
 import time
 from scripts.test_script import hello_world
 from data.amazon_review_scrape import scrape_procedure
@@ -11,6 +10,7 @@ from data.image_extract import read_image
 import click
 import csv
 
+application = create_app()
 
 @application.cli.command('test_cmd')
 def func_test_cmd():
