@@ -63,6 +63,8 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         data_list = []
         # page = requests.get(review_url)
         # soup = BeautifulSoup(page.content, "html.parser")
+        proxies = { 'http': "http://134.209.105.160:59643", 
+            'https': "https://134.209.105.160:59643"}
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
         source = requests.get(review_url, headers=headers)
         soup = BeautifulSoup(source.text, 'lxml')
@@ -109,7 +111,9 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         return data_list, current_date
     except Exception:
         traceback.print_exc()
-        print(soup.text)
+        # msg = soup.text
+        # msg = msg.replace('\n', ' ').strip()
+        # print(msg)
         print('exception in scraping------')
         time.sleep(5)
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)

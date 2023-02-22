@@ -77,17 +77,44 @@ def scrape_campaigns():
       r = requests.get(cam['buy_now_link'])
       product_url = r.url
       print('url:', product_url)
-      # end_date = '2022-12-10'
-      end_date = '2022-12-01'
-      start_date = '2023-01-10'
+      # end_date = '2022-11-15'
+      # start_date = '2023-01-10'
+      end_date = '2023-02-01'
+      start_date = '2023-02-20'
       scrape_procedure(product_url=product_url, campaign_id=cam['campaign_id'], start_date=start_date, end_date=end_date)
       print('******************************')
 
 
 @application.cli.command('campaign_images')
 def campaign_images():
+   images_data = []
+   cols = [
+         'product_url',
+         'reviewer_name',
+         'review_title',
+         'review_text',
+         'verified_purchase',
+         'thanks_message',
+         'edit_button',
+         'delete_button',
+         'valid_review',
+         'found_rec',
+         'matched_rec',
+         'campaign_id',
+         'img_link',
+   ]
    len_ss = len(ss_details)
    for idx, rec in enumerate(ss_details, 1):
       print('**********', rec['campaign_id'], f',current: {idx}/{len_ss}','**********')
-      read_image(img_link=rec['url'], campaign_id=rec['campaign_id'])
+      images_data.append(read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link']))
       print('******************************')
+
+   with open('ocr_output.csv', 'w', newline='') as f:
+      writer = csv.DictWriter(f, fieldnames=cols)
+      
+      # Write the column headers to the first row
+      writer.writeheader()
+      
+      # Write each dictionary as a row in the CSV file
+      for d in images_data:
+         writer.writerow(d)

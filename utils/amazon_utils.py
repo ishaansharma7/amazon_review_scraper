@@ -2,6 +2,7 @@ import re
 from dateutil.parser import parse
 from datetime import datetime, timedelta
 from utils.es_utils import get_last_date
+import os
 
 
 def get_review_url(product_url, page_number=1):
@@ -33,7 +34,8 @@ def get_end_date(date_str=None, campaign_id=None):
     last_date_db = get_last_date(campaign_id)     # here get last review date from ES
     if last_date_db:
         return last_date_db
-    six_days_bef_date = (datetime.now() - timedelta(days=20)).date()
+    oldest_day = int(os.environ.get('OLDEST_DAY', 20))
+    six_days_bef_date = (datetime.now() - timedelta(days=oldest_day)).date()
     six_days_bef_date = datetime.combine(six_days_bef_date, datetime.min.time())
     return six_days_bef_date
 

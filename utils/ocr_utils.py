@@ -115,6 +115,7 @@ def match_from_db(ex_da):
         return
     ex_da['found_rec'] = True
     ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
+    # ex_da['matched_rec'] = json.dumps(es_res['hits']['hits'][0]['_source'])
 
 
 def initial_keyword_check(data_eng):

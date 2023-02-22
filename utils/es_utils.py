@@ -9,13 +9,9 @@ from dateutil.parser import parse
 def insert_into_es(data):
     try:
         es = getElasticSearchClient()
-        print()
-        print()
-        print()
-        print(data)
-        print()
-        print()
-        print()
+        for each in data:
+            print(each)
+            each['_source']['review_date'] = parse(each['_source']['review_date'])
         if not es.indices.exists(index='user_reviews'):
             es.indices.create('user_reviews', ignore=400)
         response = helpers.bulk(es, actions=data)
