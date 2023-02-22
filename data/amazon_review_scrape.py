@@ -14,12 +14,13 @@ def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_
     campaign_id.
     Adds meta data to scraped data before inserting into db
     """
+    # start_date is latest date, end_date is oldest date
     start_date = get_date_time_object(start_date) if start_date else get_start_date()
     end_date = get_date_time_object(end_date) if end_date else get_end_date(end_date, campaign_id)
     print(start_date, type(start_date))
     print(end_date, type(end_date))
     scraped_data = get_review_data(product_url ,start_date, end_date)
-    insert_data_in_db(scraped_data, campaign_id)
+    insert_data_in_db(scraped_data, campaign_id, product_url)
 
 
 def get_review_data(product_url=None, start_date=None, end_date=None):
@@ -60,16 +61,21 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         review_title = None
         current_date = None
         data_list = []
-        page = requests.get(review_url)
-        soup = BeautifulSoup(page.content, "html.parser")
+        # page = requests.get(review_url)
+        # soup = BeautifulSoup(page.content, "html.parser")
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+        source = requests.get(review_url, headers=headers)
+        soup = BeautifulSoup(source.text, 'lxml')
+
+        # time.sleep(3)
+        # print(soup.text)
+        # time.sleep(30)
         review_div = soup.find("div", {"id": "cm_cr-review_list"})
         review_div_list = review_div.find_all("div", {"class": "a-section review aok-relative"})
         for each in review_div_list:
             date_span = each.find("span", {"data-hook":"review-date"})
             name_span = each.find("span", {"class":"a-profile-name"})
             current_date = date_from_date_span_text(date_span.text)
-            if current_date >= start_date or current_date <= end_date:
-                continue
             # do data extraction here
             reviewer_name = name_span.text
             review_title = get_review_title(each)
@@ -88,7 +94,6 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
                 'review_score': review_score,
                 'variant_info': variant_info,
             }
-            data_list.append(collected_data)
             print('reviewer:', name_span.text)
             print('title:', review_title)
             print('body:', review_text)
@@ -97,9 +102,14 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
             print('review_score:', str(review_score) + '%')
             print('variant_info:', variant_info)
             print()
+            if current_date >= start_date or current_date <= end_date:
+                continue
+            data_list.append(collected_data)
 
         return data_list, current_date
     except Exception:
-        # traceback.print_exc()
+        traceback.print_exc()
+        print(soup.text)
+        print('exception in scraping------')
         time.sleep(5)
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)

@@ -30,7 +30,8 @@ def read_image(filename=None, img_link=None, product_url='', campaign_id=1000):
         data_eng = clean_extracted_text(data_eng)
 
         extract_data(data_eng, ex_da)
-        match_from_db(ex_da)
+        if ex_da['review_title'] != None and ex_da['review_text'] != None:
+            match_from_db(ex_da)
 
         print('\n\n\n\n')
         print(json.dumps(ex_da, indent=5))

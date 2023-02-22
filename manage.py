@@ -9,6 +9,9 @@ from utils.es_utils import insert_into_es
 from data.image_extract import read_image
 import click
 import csv
+from campaign_det import cam_details
+from cam_ss import ss_details
+import requests
 
 application = create_app()
 
@@ -64,3 +67,27 @@ def image_test():
 @click.option('--loc')
 def single_test(loc):
    read_image(filename=loc, campaign_id=1004)
+
+
+@application.cli.command('scrape_campaigns')
+def scrape_campaigns():
+   total_cam = len(cam_details)
+   for idx, cam in enumerate(cam_details, 1):
+      print('**********', cam['campaign_id'], f',current: {idx}/{total_cam}','**********')
+      r = requests.get(cam['buy_now_link'])
+      product_url = r.url
+      print('url:', product_url)
+      # end_date = '2022-12-10'
+      end_date = '2022-12-01'
+      start_date = '2023-01-10'
+      scrape_procedure(product_url=product_url, campaign_id=cam['campaign_id'], start_date=start_date, end_date=end_date)
+      print('******************************')
+
+
+@application.cli.command('campaign_images')
+def campaign_images():
+   len_ss = len(ss_details)
+   for idx, rec in enumerate(ss_details, 1):
+      print('**********', rec['campaign_id'], f',current: {idx}/{len_ss}','**********')
+      read_image(img_link=rec['url'], campaign_id=rec['campaign_id'])
+      print('******************************')
