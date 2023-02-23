@@ -104,9 +104,13 @@ def campaign_images():
          'img_link',
    ]
    len_ss = len(ss_details)
+   scraped_cams = [rec_cam['campaign_id'] for rec_cam in cam_details]
    for idx, rec in enumerate(ss_details, 1):
       print('**********', rec['campaign_id'], f',current: {idx}/{len_ss}','**********')
-      images_data.append(read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link']))
+      if rec['campaign_id'] in scraped_cams:
+         images_data.append(read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link']))
+      else:
+         print('not from scraped campaign')
       print('******************************')
 
    with open('ocr_output.csv', 'w', newline='') as f:
