@@ -77,10 +77,10 @@ def scrape_campaigns():
       r = requests.get(cam['buy_now_link'])
       product_url = r.url
       print('url:', product_url)
-      # end_date = '2022-11-15'
-      # start_date = '2023-01-10'
-      end_date = '2023-02-01'
-      start_date = '2023-02-20'
+      end_date = '2022-11-15'
+      start_date = '2023-01-10'
+      # end_date = '2023-02-01'
+      # start_date = '2023-02-20'
       scrape_procedure(product_url=product_url, campaign_id=cam['campaign_id'], start_date=start_date, end_date=end_date)
       print('******************************')
 

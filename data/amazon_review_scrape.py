@@ -36,6 +36,7 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
     while page_number < 40 and current_date and current_date >= end_date:
         page_number += 1
         review_url = get_review_url(product_url, page_number)
+        if not review_url: break
         print(review_url)
         print()
         local_data, current_date = get_review_cleaned_data(review_url, start_date, end_date) # this will only return data if it lies b/w the range, and also return date of last review for loop break condition

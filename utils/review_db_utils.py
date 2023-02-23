@@ -22,7 +22,7 @@ def insert_data_in_db(scraped_data, campaign_id, product_url):
     print(json.dumps(es_bulk_data))
     print()
     # insert_into_es(es_bulk_data)
-    if int(os.environ.get('INSERT_DB', 0)) == 1:
+    if int(os.environ.get('INSERT_DB', 0)) == 1 and es_bulk_data:
         send_to_db(es_bulk_data)
 
 def send_to_db(es_bulk_data):
