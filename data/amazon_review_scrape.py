@@ -111,9 +111,10 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         return data_list, current_date
     except Exception:
         traceback.print_exc()
-        # msg = soup.text
-        # msg = msg.replace('\n', ' ').strip()
-        # print(msg)
+        msg = soup.text
+        if msg:
+            msg = msg.replace('\n', ' ').strip()
+            print(msg)
         print('exception in scraping------')
         time.sleep(5)
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)

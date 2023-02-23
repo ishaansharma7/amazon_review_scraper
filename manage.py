@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from flask import current_app
 from main import create_app
+application = create_app()
 import os
 import time
 from scripts.test_script import hello_world
@@ -13,7 +14,6 @@ from campaign_det import cam_details
 from cam_ss import ss_details
 import requests
 
-application = create_app()
 
 @application.cli.command('test_cmd')
 def func_test_cmd():
