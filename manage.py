@@ -3,7 +3,8 @@ from flask import current_app
 from main import create_app
 application = create_app()
 import os
-import time
+# import time
+from time import time
 from scripts.test_script import hello_world
 from data.amazon_review_scrape import scrape_procedure
 from utils.es_utils import insert_into_es
@@ -89,6 +90,8 @@ def scrape_campaigns():
 
 @application.cli.command('campaign_images')
 def campaign_images():
+   print('start time-----',datetime.now())
+   start_epoch = time()
    images_data = []
    len_ss = len(ss_details)
    scraped_cams = [rec_cam['campaign_id'] for rec_cam in cam_details]
@@ -127,3 +130,7 @@ def campaign_images():
          df.to_csv('ocr_output.csv', index=False)
       
       print('******************************')
+   print('end time-----',datetime.now())
+   end_seconds = time() - start_epoch
+   print('total duration-----', timedelta(seconds=end_seconds))
+   print('\n \n \n')
