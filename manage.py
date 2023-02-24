@@ -13,6 +13,8 @@ import csv
 from campaign_det import cam_details
 from cam_ss import ss_details
 import requests
+import pandas as pd
+import json
 
 
 @application.cli.command('test_cmd')
@@ -88,37 +90,40 @@ def scrape_campaigns():
 @application.cli.command('campaign_images')
 def campaign_images():
    images_data = []
-   cols = [
-         'product_url',
-         'reviewer_name',
-         'review_title',
-         'review_text',
-         'verified_purchase',
-         'thanks_message',
-         'edit_button',
-         'delete_button',
-         'valid_review',
-         'found_rec',
-         'matched_rec',
-         'campaign_id',
-         'img_link',
-   ]
    len_ss = len(ss_details)
    scraped_cams = [rec_cam['campaign_id'] for rec_cam in cam_details]
+   sub_status = {0:'draft', 1:'pending', 2:'rejected', 3:'approved'}
    for idx, rec in enumerate(ss_details, 1):
+      # if idx == 11:
+      #    break
       print('**********', rec['campaign_id'], f',current: {idx}/{len_ss}','**********')
-      if rec['campaign_id'] in scraped_cams:
-         images_data.append(read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link']))
-      else:
+      if rec['campaign_id'] not in scraped_cams:
          print('not from scraped campaign')
-      print('******************************')
+         continue
 
-   with open('ocr_output.csv', 'w', newline='') as f:
-      writer = csv.DictWriter(f, fieldnames=cols)
+      res_dict = read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link'])
+      images_data.append(res_dict)
+
+      submi_status = sub_status[rec.get('proof_status', 3)]
+      matched_rec = res_dict['matched_rec']
+      res_dict.pop('matched_rec')
+      row = {
+         'image_json_post_ocr': json.dumps(res_dict),
+         'review_scrapper_json': json.dumps(matched_rec) if res_dict['found_rec'] else 'null',
+         'submi_status': submi_status,
+         'ocr_status': 'approved' if res_dict['valid_review'] else 'rejected',
+         'campaign_id': res_dict['campaign_id'],
+         'image_url': res_dict['img_link'],
+      }
+      file_exists = os.path.isfile('ocr_output.csv')
+
+      # Create a pandas DataFrame from the list of dictionaries
+      df = pd.DataFrame([row])
+
+      # Append the DataFrame to the CSV file if it already exists, otherwise create a new file
+      if file_exists:
+         df.to_csv('ocr_output.csv', mode='a', header=False, index=False)
+      else:
+         df.to_csv('ocr_output.csv', index=False)
       
-      # Write the column headers to the first row
-      writer.writeheader()
-      
-      # Write each dictionary as a row in the CSV file
-      for d in images_data:
-         writer.writerow(d)
+      print('******************************')
