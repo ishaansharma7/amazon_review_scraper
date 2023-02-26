@@ -5,6 +5,7 @@ import requests
 import io
 from PIL import Image
 from utils.connection_utils import getElasticSearchClient
+from dateutil.parser import parse
 
 def prepare_image(filename, img_link):
     """
@@ -53,6 +54,7 @@ def extract_data(data_eng, ex_da):
         return
 
     in_india_idx = idx  # Reviewed in India
+    ex_da['review_date'] = get_review_date(in_india_idx, line_list)
     if 'Verified Purchase' not in line_list[in_india_idx-3]:       # means title is of 1 line
         ex_da['reviewer_name'] = clean_name(line_list[in_india_idx-3])
         ex_da['review_title'] = clean_title1(in_india_idx, line_list)
@@ -76,9 +78,23 @@ def extract_data(data_eng, ex_da):
     ex_da['thanks_message'] = True if 'Thank you for your review' in data_eng else False
     ex_da['edit_button'] = True if 'Edit Delete' in data_eng else False
     ex_da['delete_button'] = True if 'Edit Delete' in data_eng else False
-    ex_da['valid_review'] = True
+    ex_da['ocr_success'] = True
 
-    
+
+def get_review_date(in_india_idx, line_list):
+    """
+    return datetime obj from `Reviewed in India on ...` phrase
+    """
+    try:
+        review_phrase = line_list[in_india_idx]
+        date_phrase = review_phrase.split(' on ')[-1].strip()
+        review_date = parse(date_phrase)
+        return str(review_date)
+    except Exception:
+        traceback.print_exc()
+    return None
+
+
 
 def match_from_db(ex_da):
     query = {

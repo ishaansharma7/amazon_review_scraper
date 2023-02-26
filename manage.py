@@ -22,49 +22,18 @@ import json
 def func_test_cmd():
    hello_world()
 
-@application.cli.command('scrape_amazon')
-def scrape_amazon():
-   product_url = 'https://www.amazon.in/dp/B0BQRM1NMG/ref=sr_1_2?keywords=dermatouch%2Bsunscreen%2Bspf%2B50&qid=1676459442&sprefix=dermat%2Caps%2C362&sr=8-2&th=1'
-   # end_date = '2022-12-10'
-   scrape_procedure(product_url=product_url, campaign_id=1004)
-
 
 @application.cli.command('insert_data')
 def insert_data():
    insert_into_es()
 
 
-@application.cli.command('image_test')
-def image_test():
-   images_data = []
-   cols = [
-      'reviewer_name',
-      'review_title',
-      'review_text',
-      'verified_purchase',
-      'thanks_message',
-      'edit_button',
-      'delete_button',
-      'valid_review',
-      'img_link',
-   ]
-   with open('images_link.csv') as f:
-      reader = csv.reader(f)
-      for idx, row in enumerate(reader):
-         image_url, filename = row
-         print('current:-', idx)
-         images_data.append(read_image(img_link=image_url))
-   
+@application.cli.command('scrape_amazon')
+def scrape_amazon():
+   product_url = 'https://www.amazon.in/dp/B0BQRM1NMG/ref=sr_1_2?keywords=dermatouch%2Bsunscreen%2Bspf%2B50&qid=1676459442&sprefix=dermat%2Caps%2C362&sr=8-2&th=1'
+   # end_date = '2022-12-10'
+   scrape_procedure(product_url=product_url, campaign_id=1004)
 
-   with open('ocr_output.csv', 'w', newline='') as f:
-      writer = csv.DictWriter(f, fieldnames=cols)
-      
-      # Write the column headers to the first row
-      writer.writeheader()
-      
-      # Write each dictionary as a row in the CSV file
-      for d in images_data:
-         writer.writerow(d)
 
 @application.cli.command('single_test')
 @click.option('--loc')
@@ -104,7 +73,7 @@ def campaign_images():
          print('not from scraped campaign')
          continue
 
-      res_dict = read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link'])
+      res_dict = read_image(img_link=rec['url'], campaign_id=rec['campaign_id'], product_url=rec['buy_now_link'], user_id=rec['user_id'])
       images_data.append(res_dict)
 
       submi_status = sub_status[rec.get('proof_status', 3)]
@@ -113,9 +82,11 @@ def campaign_images():
       row = {
          'image_json_post_ocr': json.dumps(res_dict),
          'review_scrapper_json': json.dumps(matched_rec) if res_dict['found_rec'] else 'null',
+         'ocr_success': res_dict['ocr_success'],
          'submi_status': submi_status,
          'ocr_status': 'approved' if res_dict['valid_review'] else 'rejected',
          'campaign_id': res_dict['campaign_id'],
+         'user_id': res_dict['user_id'],
          'image_url': res_dict['img_link'],
       }
       file_exists = os.path.isfile('ocr_output.csv')
