@@ -45,7 +45,7 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
         print('current_date:', current_date, ', page_number:', page_number)
         print()
         print('************************')
-        if not local_data:
+        if not current_date:
             break
         time.sleep(5)
         
