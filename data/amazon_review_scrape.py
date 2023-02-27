@@ -5,6 +5,7 @@ get_review_title, get_review_body, get_review_score, get_variant_info, get_start
 from utils.review_db_utils import insert_data_in_db
 import time
 import traceback
+from constants import PAGE_LIMIT
 
 
 
@@ -33,7 +34,7 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
     page_number = 0
     scraped_data = []
     current_date = start_date
-    while page_number < 40 and current_date and current_date >= end_date:
+    while page_number < PAGE_LIMIT and current_date and current_date >= end_date:
         page_number += 1
         review_url = get_review_url(product_url, page_number)
         if not review_url: break
@@ -44,6 +45,8 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
         print('current_date:', current_date, ', page_number:', page_number)
         print()
         print('************************')
+        if not local_data:
+            break
         time.sleep(5)
         
     return scraped_data
