@@ -108,7 +108,7 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
             print('review_score:', str(review_score) + '%')
             print('variant_info:', variant_info)
             print()
-            if current_date >= start_date or current_date <= end_date:
+            if current_date > start_date or current_date < end_date:
                 continue
             data_list.append(collected_data)
 
