@@ -40,6 +40,12 @@ def scrape_amazon():
 def single_test(loc):
    read_image(filename=loc, campaign_id=1004)
 
+   
+@application.cli.command('single_test_url')
+def single_test():
+   img_link = 'https://firebasestorage.googleapis.com/v0/b/api-project-3577377239.appspot.com/o/user%2F8d3aa0686cae409aa88307a251919809%2Fmedia%2Fdocument%2Fimage%3A1000058872_20230121_233404?alt=media&token=3ed0984f-9ec3-4b3d-a233-bb3542452bd7'
+   read_image(img_link=img_link, campaign_id=14565)
+
 
 @application.cli.command('scrape_campaigns')
 def scrape_campaigns():
@@ -82,6 +88,8 @@ def campaign_images():
       row = {
          'image_json_post_ocr': json.dumps(res_dict),
          'review_scrapper_json': json.dumps(matched_rec) if res_dict['found_rec'] else 'null',
+         'product_url': res_dict['product_url'],
+         'date_in_ss': res_dict['review_date'],
          'ocr_success': res_dict['ocr_success'],
          'submi_status': submi_status,
          'ocr_status': 'approved' if res_dict['valid_review'] else 'rejected',

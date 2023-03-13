@@ -26,3 +26,4 @@ env/
 __pycache__
 test_folder
 *.csv
+log.txt

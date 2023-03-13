@@ -127,7 +127,7 @@ def match_from_db(ex_da):
     print(json.dumps(query, indent=2))
     es_res = es.search(index='user_reviews', body=query)
     print('max_score:',  es_res['hits'].get('max_score'))
-    if not es_res['hits']['max_score'] or es_res['hits'].get('max_score', 1) < 90:
+    if not es_res['hits']['max_score'] or es_res['hits'].get('max_score', 1) < 80:
         return
     ex_da['found_rec'] = True
     ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
@@ -138,7 +138,8 @@ def initial_keyword_check(data_eng):
     """
     check basic keywords are present for authentic review
     """
-    if 'Reviewed in India' in data_eng and 'Thank you for your review' in data_eng and 'Verified Purchase' in data_eng:
+    data_eng = data_eng.lower()
+    if 'reviewed in india' in data_eng and 'thank you for your review' in data_eng and 'verified purchase' in data_eng:
         return True
     return False
 
