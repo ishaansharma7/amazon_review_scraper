@@ -43,8 +43,8 @@ def single_test(loc):
    
 @application.cli.command('single_test_url')
 def single_test():
-   img_link = 'https://firebasestorage.googleapis.com/v0/b/api-project-3577377239.appspot.com/o/user%2F8d3aa0686cae409aa88307a251919809%2Fmedia%2Fdocument%2Fimage%3A1000058872_20230121_233404?alt=media&token=3ed0984f-9ec3-4b3d-a233-bb3542452bd7'
-   read_image(img_link=img_link, campaign_id=14565)
+   img_link = "https://firebasestorage.googleapis.com/v0/b/api-project-3577377239.appspot.com/o/user%2F7c1984ae9ab84e9492516635bc071afc%2Fmedia%2Fdocument%2Fimage%3A1000003284_20221028_095221?alt=media&token=2da258b9-77e8-445a-9b51-33dd5b6739ea"
+   read_image(img_link=img_link, campaign_id=12533)
 
 
 @application.cli.command('scrape_campaigns')

@@ -6,6 +6,8 @@ import io
 from PIL import Image
 from utils.connection_utils import getElasticSearchClient
 from dateutil.parser import parse
+from fuzzywuzzy import fuzz
+
 
 def prepare_image(filename, img_link):
     """
@@ -16,7 +18,8 @@ def prepare_image(filename, img_link):
         if not img_link:
             image = cv2.imread(filename)
             gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            (thresh, bw_img) = cv2.threshold(gray_img, 127, 255, cv2.THRESH_BINARY)
+            (thresh, bw_img) = cv2.threshold(
+                gray_img, 127, 255, cv2.THRESH_BINARY)
             image = bw_img
         else:
             response = requests.get(img_link)
@@ -38,24 +41,25 @@ def extract_data(data_eng, ex_da):
     if not initial_keyword_check(data_eng):
         print('anchor keyword not found')
         return False
-    
+
     data_eng = data_eng.strip()
     line_list = data_eng.split('\n')
-    
+
     # print ocr text with index
     for index, line in enumerate(line_list):
-        print(f'[{index}]:',line)
+        print(f'[{index}]:', line)
 
     idx = find_target_reviewed_in_india(line_list)
 
     # checks if screenshot is not cropped ie contains title
-    if not idx and idx-3<0:
+    if not idx and idx-3 < 0:
         print('out of index ----')
         return
 
     in_india_idx = idx  # Reviewed in India
     ex_da['review_date'] = get_review_date(in_india_idx, line_list)
-    if 'Verified Purchase' not in line_list[in_india_idx-3]:       # means title is of 1 line
+    # means title is of 1 line
+    if 'Verified Purchase' not in line_list[in_india_idx-3]:
         ex_da['reviewer_name'] = clean_name(line_list[in_india_idx-3])
         ex_da['review_title'] = clean_title1(in_india_idx, line_list)
     else:   # means title is of 2 line
@@ -66,7 +70,8 @@ def extract_data(data_eng, ex_da):
     idx = find_index_using_keyword(line_list, 'Thank you for your review')
     thank_idx = idx
 
-    if variant_info_available(ex_da['campaign_id']):    # skip the variant info line and get review body
+    # skip the variant info line and get review body
+    if variant_info_available(ex_da['campaign_id']):
         review_text = clean_review_text(in_india_idx+1, thank_idx, line_list)
     else:
         review_text = clean_review_text(in_india_idx, thank_idx, line_list)
@@ -95,43 +100,58 @@ def get_review_date(in_india_idx, line_list):
     return None
 
 
-
 def match_from_db(ex_da):
-    query = {
-    "query": {
-        "bool": {
-        "must": [
-            {
-            "term": {
-                "campaign_id": ex_da['campaign_id']
+    try:
+        query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"campaign_id": ex_da['campaign_id']}},
+                        {"term": {"review_date": ex_da['review_date'].replace(' ','T')}},
+                        {"match": {
+                            "review_text": {
+                                "query": ex_da['review_text'],
+                                "fuzziness": "AUTO"
+                            }
+                        }}
+                    ]
+                }
             }
-            },
-            {
-            "query_string": {
-                "query": ex_da['review_title'],
-                "default_field": "review_title"
-            }
-            },
-            {
-            "query_string": {
-                "query": ex_da['review_text'],
-                "default_field": "review_text"
-            } 
-            }
-        ]
         }
-    }
-    }
-    es = getElasticSearchClient()
-    print()
-    print(json.dumps(query, indent=2))
-    es_res = es.search(index='user_reviews', body=query)
-    print('max_score:',  es_res['hits'].get('max_score'))
-    if not es_res['hits']['max_score'] or es_res['hits'].get('max_score', 1) < 80:
-        return
-    ex_da['found_rec'] = True
-    ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
-    # ex_da['matched_rec'] = json.dumps(es_res['hits']['hits'][0]['_source'])
+        es = getElasticSearchClient()
+        print()
+        print(json.dumps(query, indent=2))
+        es_res = es.search(index='user_reviews', body=query)
+        print('max_score:',  es_res['hits'].get('max_score'))
+        if not es_res['hits']['max_score']:
+            return
+        
+        # add match % test here
+        string1 = ex_da['review_text']
+        string2 = es_res['hits']['hits'][0]['_source']['review_text']
+        if fuzzywuzzy_check(string1, string2):
+            ex_da['found_rec'] = True
+            ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
+        # ex_da['matched_rec'] = json.dumps(es_res['hits']['hits'][0]['_source'])
+    except Exception:
+        traceback.print_exc()
+
+
+def fuzzywuzzy_check(string1, string2):
+    try:
+        str1_len = len(string1)
+        str2_len = len(string2)
+        if str1_len <= str2_len:
+            string2 = string2[:str1_len]
+        else:
+            string1 = string1[:str2_len]
+        ratio = fuzz.ratio(string1, string2)
+        print('match_ratio:', ratio)
+        if ratio >= 90:
+            return True
+    except Exception:
+        traceback.print_exc()
+    return False
 
 
 def initial_keyword_check(data_eng):
@@ -142,6 +162,7 @@ def initial_keyword_check(data_eng):
     if 'reviewed in india' in data_eng and 'thank you for your review' in data_eng and 'verified purchase' in data_eng:
         return True
     return False
+
 
 def find_index_using_keyword(line_list, keyword):
     """
@@ -171,6 +192,7 @@ def find_target_reviewed_in_india(line_list):
         traceback.print_exc()
     return None
 
+
 def clean_extracted_text(data_eng):
     data_eng = data_eng.replace('\n\n', '\n')
     cleaned_data = ''
@@ -179,6 +201,7 @@ def clean_extracted_text(data_eng):
             cleaned_data += char
     return cleaned_data
 
+
 def clean_name(rv_name):
     try:
         rv_name = rv_name.strip()
@@ -186,6 +209,7 @@ def clean_name(rv_name):
     except Exception:
         traceback.print_exc()
     return None
+
 
 def clean_title1(in_india_idx, line_list):
     """
@@ -203,13 +227,14 @@ def clean_title2(in_india_idx, line_list):
     """
     returns the combined title that is present
     2 and 1 line above `Reviewed in India`
-    """ 
+    """
     try:
         title_idx = in_india_idx-2
         return ' '.join(line_list[title_idx: in_india_idx])
     except Exception:
         traceback.print_exc()
     return None
+
 
 def clean_review_text(in_india_idx, thank_idx, line_list):
     """
@@ -233,16 +258,15 @@ def variant_info_available(campaign_id):
         query = {
             "query": {
                 "bool": {
-                "must": [
-                    {
-                    "term": {
-                        "campaign_id": campaign_id
-                    }
-                    }
-                ]
+                    "must": [
+                        {
+                            "term": {
+                                "campaign_id": campaign_id
+                            }
+                        }
+                    ]
                 }
-            }
-            , "size": 1
+            }, "size": 1
         }
         es_res = es.search(index='user_reviews', body=query)
         if len(es_res['hits']['hits']) > 0:
