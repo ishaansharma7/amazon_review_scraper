@@ -24,6 +24,7 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
         'campaign_id': campaign_id,
         'review_date': None,
         'user_id': user_id,
+        'reason':''
     }
     try:
         image, success = prepare_image(filename, img_link)

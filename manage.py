@@ -96,6 +96,7 @@ def campaign_images():
          'campaign_id': res_dict['campaign_id'],
          'user_id': res_dict['user_id'],
          'image_url': res_dict['img_link'],
+         'reason': res_dict['reason'],
       }
       file_exists = os.path.isfile('ocr_output.csv')
 

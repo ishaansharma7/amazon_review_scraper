@@ -40,6 +40,7 @@ def extract_data(data_eng, ex_da):
 
     if not initial_keyword_check(data_eng):
         print('anchor keyword not found')
+        ex_da['reason'] = 'not valid review screenshot'
         return False
 
     data_eng = data_eng.strip()
@@ -124,6 +125,7 @@ def match_from_db(ex_da):
         es_res = es.search(index='user_reviews', body=query)
         print('max_score:',  es_res['hits'].get('max_score'))
         if not es_res['hits']['max_score']:
+            ex_da['reason'] = 'record not found in db'
             return
         
         # add match % test here
@@ -132,6 +134,8 @@ def match_from_db(ex_da):
         if fuzzywuzzy_check(string1, string2):
             ex_da['found_rec'] = True
             ex_da['matched_rec'] = es_res['hits']['hits'][0]['_source']
+        else:
+            ex_da['reason'] = 'match_ratio less than 80%'
         # ex_da['matched_rec'] = json.dumps(es_res['hits']['hits'][0]['_source'])
     except Exception:
         traceback.print_exc()
@@ -147,7 +151,7 @@ def fuzzywuzzy_check(string1, string2):
             string1 = string1[:str2_len]
         ratio = fuzz.ratio(string1, string2)
         print('match_ratio:', ratio)
-        if ratio >= 90:
+        if ratio >= 80:
             return True
     except Exception:
         traceback.print_exc()
