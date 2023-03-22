@@ -40,11 +40,12 @@ def get_end_date(date_str=None, campaign_id=None):
         return parse(date_str)
     last_date_db = get_last_date(campaign_id)     # here get last review date from ES
     if last_date_db:
+        print()
         return last_date_db
     oldest_day = int(os.environ.get('OLDEST_DAY', 20))
-    six_days_bef_date = (datetime.now() - timedelta(days=oldest_day)).date()
-    six_days_bef_date = datetime.combine(six_days_bef_date, datetime.min.time())
-    return six_days_bef_date
+    days_bef_date = (datetime.now() - timedelta(days=oldest_day)).date()
+    days_bef_date = datetime.combine(days_bef_date, datetime.min.time())
+    return days_bef_date
 
 
 def date_from_date_span_text(date_str):

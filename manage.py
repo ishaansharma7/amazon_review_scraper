@@ -5,7 +5,7 @@ application = create_app()
 import os
 # import time
 from time import time
-from scripts.test_script import hello_world
+from scripts.amazon_scrape_job import hello_world
 from data.amazon_review_scrape import scrape_procedure
 from utils.es_utils import insert_into_es
 from data.image_extract import read_image
