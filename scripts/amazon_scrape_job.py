@@ -1,5 +1,5 @@
 from data.amazon_review_scrape import scrape_procedure
-
+import requests
 
 def amazon_scrape_job():
     cam_details = live_campaigns_list()
@@ -18,9 +18,12 @@ def live_campaigns_list():
     """
     cam_details = [
         {"campaign_id":12533,"buy_now_link":"https://amzn.to/3rExEid"},
-        {"campaign_id":14356,"buy_now_link":"https://amzn.to/3uG60mf"},
-        {"campaign_id":14565,"buy_now_link":"https://amzn.to/3FxiQcG"}
+        # {"campaign_id":14356,"buy_now_link":"https://amzn.to/3uG60mf"},
+        # {"campaign_id":14565,"buy_now_link":"https://amzn.to/3FxiQcG"}
     ]
+    for cam in cam_details:
+        r = requests.get(cam['buy_now_link'])
+        cam['buy_now_link'] = r.url
     return cam_details
 
 

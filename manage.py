@@ -5,7 +5,7 @@ application = create_app()
 import os
 # import time
 from time import time
-from scripts.amazon_scrape_job import hello_world
+from scripts.amazon_scrape_job import hello_world, amazon_scrape_job
 from data.amazon_review_scrape import scrape_procedure
 from utils.es_utils import insert_into_es
 from data.image_extract import read_image
@@ -21,6 +21,11 @@ import json
 @application.cli.command('test_cmd')
 def func_test_cmd():
    hello_world()
+
+
+@application.cli.command('test_job')
+def test_job():
+   amazon_scrape_job()
 
 
 @application.cli.command('insert_data')

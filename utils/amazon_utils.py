@@ -2,6 +2,9 @@ import re
 from dateutil.parser import parse
 from datetime import datetime, timedelta
 from utils.es_utils import get_last_date
+from constants import LAST_DATE_URL
+import json
+import requests
 import os
 import traceback
 
@@ -35,12 +38,14 @@ def get_start_date():
     one_day_before = datetime.combine(one_day_before, datetime.min.time())
     return one_day_before
 
+
 def get_end_date(date_str=None, campaign_id=None):
     if date_str:
         return parse(date_str)
-    last_date_db = get_last_date(campaign_id)     # here get last review date from ES
+    # last_date_db = get_last_date(campaign_id)     # here get last review date from ES
+    last_date_db = last_date_api(campaign_id)
     if last_date_db:
-        print()
+        print(str(last_date_db))
         return last_date_db
     oldest_day = int(os.environ.get('OLDEST_DAY', 20))
     days_bef_date = (datetime.now() - timedelta(days=oldest_day)).date()
@@ -77,6 +82,7 @@ def get_review_body(review_html):
         print('review body extraction failed ----')
     return None
 
+
 def get_review_score(review_html):
     try:
         score_html = review_html.find("i", {"data-hook":"review-star-rating"})
@@ -89,6 +95,7 @@ def get_review_score(review_html):
         print('review score extraction failed ----')
     return None
 
+
 def get_variant_info(review_html):
     try:
         variant_html = review_html.find("a", {"data-hook":"format-strip"})
@@ -99,3 +106,22 @@ def get_variant_info(review_html):
         print('variant extraction failed ----')
     return None
 
+
+def last_date_api(campaign_id):
+    last_date = None
+    try:
+        headers = {
+            'Content-Type': 'application/json',
+            'Cookie': 'session=c2336f68-786d-4ab6-936f-47ae5dcd84ad; session=c2336f68-786d-4ab6-936f-47ae5dcd84ad'
+        }
+        url = LAST_DATE_URL
+        params = {'campaign_id': campaign_id}
+        response = requests.get(url=url, headers=headers, params=params)
+        # print(response.url)
+        # print(response)
+        # print(resp)
+        resp = response.json()
+        last_date = parse(resp['last_date'])
+    except Exception:
+        traceback.print_exc()
+    return last_date
