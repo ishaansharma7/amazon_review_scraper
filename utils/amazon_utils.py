@@ -46,7 +46,7 @@ def get_end_date(date_str=None, campaign_id=None):
     last_date_db = last_date_api(campaign_id)
     if last_date_db:
         print(str(last_date_db))
-        return last_date_db
+        return last_date_db - timedelta(10)
     oldest_day = int(os.environ.get('OLDEST_DAY', 20))
     days_bef_date = (datetime.now() - timedelta(days=oldest_day)).date()
     days_bef_date = datetime.combine(days_bef_date, datetime.min.time())
@@ -121,7 +121,8 @@ def last_date_api(campaign_id):
         # print(response)
         # print(resp)
         resp = response.json()
-        last_date = parse(resp['last_date'])
+        if resp['last_date'] != None:
+            last_date = parse(resp['last_date'])
     except Exception:
         traceback.print_exc()
     return last_date
