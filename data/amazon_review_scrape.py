@@ -68,9 +68,13 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         data_list = []
         # page = requests.get(review_url)
         # soup = BeautifulSoup(page.content, "html.parser")
-        proxies = { 'http': "http://134.209.105.160:59643", 
-            'https': "https://134.209.105.160:59643"}
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+        proxies = {'https': '27.239.65.23:8085'}
+        headers = ({'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+            AppleWebKit/537.36 (KHTML, like Gecko) \
+            Chrome/90.0.4430.212 Safari/537.36',
+            'Accept-Language': 'en-US, en;q=0.5'})
+        print('url:-', review_url)
         source = requests.get(review_url, headers=headers)
         soup = BeautifulSoup(source.text, 'lxml')
 
@@ -116,20 +120,22 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         return data_list, current_date
     except Exception:
         traceback.print_exc()
-        msg = soup.text
-        if msg:
-            msg = msg.replace('\n', ' ').strip()
-            print(msg)
+        if soup:
+            msg = soup.text
+            if msg:
+                msg = msg.replace('\n', ' ').strip()
+                print(msg)
+                del source
+                del soup
         print('exception in scraping------')
-        del source
-        del soup
         refresh(review_url)
         time.sleep(random.randint(3,7))
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)
 
 def refresh(review_url):
-    product_code = get_product_code(review_url)
+    # product_code = get_product_code(review_url)
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
-    product_page = 'https://www.amazon.in/dp/' + product_code
+    # product_page = 'https://www.amazon.in/dp/' + product_code
+    product_page = 'https://www.amazon.in/'
     source = requests.get(product_page, headers=headers)
     print('refresh ran ')
