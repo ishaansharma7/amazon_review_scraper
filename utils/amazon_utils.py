@@ -30,6 +30,26 @@ def get_review_url(product_url, page_number=1):
         print(product_url)
     return None
 
+def get_product_code(product_url, page_number=1):
+    """
+    Gets product url and returns the url of review page with most recent sorted
+    """
+    try:
+        if product_url[-1] != '/':
+            product_url += '/'
+        print('product_url:', product_url)
+        match = re.search(r'\b[A-Z0-9]{10}/\b', product_url)
+        if not match: match = re.search(r'\b[A-Z0-9]{10}?\b', product_url)
+        # match = re.search(r'\b[A-Z0-9]{10}\b/', product_url)
+        start_idx = match.start()
+        product_code = product_url[start_idx:start_idx+10]
+        return product_code
+    except Exception:
+        traceback.print_exc()
+        print('unable determine url ----')
+        print(product_url)
+    return None
+
 def get_date_time_object(date_str):
     return parse(date_str)
 

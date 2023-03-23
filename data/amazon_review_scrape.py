@@ -1,11 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 from utils.amazon_utils import (get_date_time_object, get_review_url, date_from_date_span_text,
-get_review_title, get_review_body, get_review_score, get_variant_info, get_start_date, get_end_date)
+get_review_title, get_review_body, get_review_score, get_variant_info, get_start_date, get_end_date, get_product_code)
 from utils.review_db_utils import insert_data_in_db
 import time
 import traceback
 from constants import PAGE_LIMIT
+import random
 
 
 
@@ -47,7 +48,7 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
         print('************************')
         if not current_date:
             break
-        time.sleep(5)
+        time.sleep(random.randint(3,7))
         
     return scraped_data
 
@@ -120,5 +121,15 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
             msg = msg.replace('\n', ' ').strip()
             print(msg)
         print('exception in scraping------')
-        time.sleep(5)
+        del source
+        del soup
+        refresh(review_url)
+        time.sleep(random.randint(3,7))
         return get_review_cleaned_data(review_url, start_date, end_date, retry-1)
+
+def refresh(review_url):
+    product_code = get_product_code(review_url)
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+    product_page = 'https://www.amazon.in/dp/' + product_code
+    source = requests.get(product_page, headers=headers)
+    print('refresh ran ')
