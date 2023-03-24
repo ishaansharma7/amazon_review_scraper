@@ -75,7 +75,8 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
             Chrome/90.0.4430.212 Safari/537.36',
             'Accept-Language': 'en-US, en;q=0.5'})
         print('url:-', review_url)
-        source = requests.get(review_url, headers=headers)
+        source = requests.get(url=review_url)
+        # source = requests.get('http://localhost:8050/render.html', params={'url': review_url, 'wait':2})
         soup = BeautifulSoup(source.text, 'lxml')
 
         # time.sleep(3)
