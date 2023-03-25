@@ -1,9 +1,9 @@
-from utils.es_utils import insert_into_es
 import json
 import requests
 from constants import POST_REVIEW_URL
 import os
 from datetime import datetime
+import hashlib
 
 
 def insert_data_in_db(scraped_data, campaign_id, product_url, platform):
@@ -17,15 +17,17 @@ def insert_data_in_db(scraped_data, campaign_id, product_url, platform):
         each_rec['platform'] = platform
         es_data = {
             '_index': 'user_reviews',
-            '_source': each_rec
+            '_id': create_hash(each_rec['reviewer_name'], each_rec['review_title'], str(campaign_id)),
+            '_source': each_rec,
+            "doc_as_upsert": True
         }
         es_bulk_data.append(es_data)
-    print()
-    print(json.dumps(es_bulk_data))
-    print()
-    # insert_into_es(es_bulk_data)
+
     if int(os.environ.get('INSERT_DB', 0)) == 1 and es_bulk_data:
         send_to_db(es_bulk_data)
+        print('data sent to api for campaign: ', campaign_id)
+    else:
+        print('data not sent to api for campaign: ', campaign_id)
 
 
 def send_to_db(es_bulk_data):
@@ -37,3 +39,9 @@ def send_to_db(es_bulk_data):
     url = POST_REVIEW_URL
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text)
+
+
+def create_hash(*args):
+    full_str = ' '.join(args)
+    hobj = hashlib.sha256(full_str.encode())
+    return hobj.hexdigest()
