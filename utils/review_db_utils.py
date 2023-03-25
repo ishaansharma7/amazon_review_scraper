@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 
-def insert_data_in_db(scraped_data, campaign_id, product_url):
+def insert_data_in_db(scraped_data, campaign_id, product_url, platform):
     es_bulk_data = []
     scrape_date = str(datetime.now())
     for each_rec in scraped_data:
@@ -14,6 +14,7 @@ def insert_data_in_db(scraped_data, campaign_id, product_url):
         each_rec['product_url'] = product_url
         each_rec['review_date'] = str(each_rec['review_date'])
         each_rec['scrape_date'] = scrape_date
+        each_rec['platform'] = platform
         es_data = {
             '_index': 'user_reviews',
             '_source': each_rec

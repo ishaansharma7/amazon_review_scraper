@@ -10,12 +10,13 @@ def insert_into_es(data):
     try:
         es = getElasticSearchClient()
         for each in data:
-            print(each)
-            each['_source']['review_date'] = parse(each['_source']['review_date'])
+            # print(each)
+            each['_source']['review_date'] = each['_source']['review_date'].replace(' ', 'T')
+            each['_source']['scrape_date'] = each['_source']['scrape_date'].replace(' ', 'T')
         if not es.indices.exists(index='user_reviews'):
             es.indices.create('user_reviews', ignore=400)
         response = helpers.bulk(es, actions=data)
-        print("response-",response)
+        print("response---",response)
     except Exception:
         traceback.print_exc()        
 

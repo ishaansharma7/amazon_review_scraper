@@ -54,9 +54,9 @@ def get_date_time_object(date_str):
     return parse(date_str)
 
 def get_start_date():
-    one_day_before =  (datetime.now() - timedelta(days=1)).date()
-    one_day_before = datetime.combine(one_day_before, datetime.min.time())
-    return one_day_before
+    curr_day =  (datetime.now()).date()
+    curr_day = datetime.combine(curr_day, datetime.min.time())
+    return curr_day
 
 
 def get_end_date(date_str=None, campaign_id=None):
@@ -144,5 +144,6 @@ def last_date_api(campaign_id):
         if resp['last_date'] != None:
             last_date = parse(resp['last_date'])
     except Exception:
-        traceback.print_exc()
+        # traceback.print_exc()
+        print('unable to get last date ----')
     return last_date

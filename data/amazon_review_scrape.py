@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 from utils.amazon_utils import (get_date_time_object, get_review_url, date_from_date_span_text,
 get_review_title, get_review_body, get_review_score, get_variant_info, get_start_date, get_end_date, get_product_code)
 from utils.review_db_utils import insert_data_in_db
+from utils.connection_utils import get_web_driver
+from constants import CHROMEDRIVER, HEADLESS
 import time
 import traceback
 from constants import PAGE_LIMIT
@@ -21,8 +23,11 @@ def scrape_procedure(product_url=None, start_date=None, end_date=None, campaign_
     end_date = get_date_time_object(end_date) if end_date else get_end_date(end_date, campaign_id)
     print(start_date, type(start_date))
     print(end_date, type(end_date))
+    global driver
+    driver = get_web_driver(CHROMEDRIVER, HEADLESS)
     scraped_data = get_review_data(product_url ,start_date, end_date)
-    insert_data_in_db(scraped_data, campaign_id, product_url)
+    insert_data_in_db(scraped_data, campaign_id, product_url, 'amazon')
+    driver.quit()
 
 
 def get_review_data(product_url=None, start_date=None, end_date=None):
@@ -49,11 +54,10 @@ def get_review_data(product_url=None, start_date=None, end_date=None):
         if not current_date:
             break
         time.sleep(random.randint(3,7))
-        
     return scraped_data
 
 
-def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
+def get_review_cleaned_data(review_url, start_date, end_date,retry=15):
     if retry < 1:
         print('retry over ----')
         return [], None
@@ -66,22 +70,11 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         review_title = None
         current_date = None
         data_list = []
-        # page = requests.get(review_url)
-        # soup = BeautifulSoup(page.content, "html.parser")
-        proxies = {'https': '27.239.65.23:8085'}
-        headers = ({'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-            AppleWebKit/537.36 (KHTML, like Gecko) \
-            Chrome/90.0.4430.212 Safari/537.36',
-            'Accept-Language': 'en-US, en;q=0.5'})
         print('url:-', review_url)
-        source = requests.get(url=review_url)
-        # source = requests.get('http://localhost:8050/render.html', params={'url': review_url, 'wait':2})
-        soup = BeautifulSoup(source.text, 'lxml')
-
-        # time.sleep(3)
-        # print(soup.text)
-        # time.sleep(30)
+        driver.get(review_url)
+        time.sleep(2)
+        source = driver.page_source
+        soup = BeautifulSoup(source, 'lxml')
         review_div = soup.find("div", {"id": "cm_cr-review_list"})
         review_div_list = review_div.find_all("div", {"class": "a-section review aok-relative"})
         for each in review_div_list:
@@ -121,13 +114,6 @@ def get_review_cleaned_data(review_url, start_date, end_date, retry=15):
         return data_list, current_date
     except Exception:
         traceback.print_exc()
-        if soup:
-            msg = soup.text
-            if msg:
-                msg = msg.replace('\n', ' ').strip()
-                print(msg)
-                del source
-                del soup
         print('exception in scraping------')
         refresh(review_url)
         time.sleep(random.randint(3,7))
