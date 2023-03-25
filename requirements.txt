@@ -41,3 +41,5 @@ tomli
 urllib3
 Werkzeug
 WTForms
+selenium
+fuzzywuzzy
