@@ -35,6 +35,7 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
 
         extract_data(data_eng, ex_da)
         if ex_da['review_title'] != None and ex_da['review_text'] != None and not real_time:
+            print('db match ---')
             match_from_db(ex_da)
 
         ex_da['valid_review'] = True if ex_da['ocr_success'] and ex_da['found_rec'] else False
