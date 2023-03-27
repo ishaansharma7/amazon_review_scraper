@@ -16,15 +16,16 @@ def health_check_status():
 @returns_json
 def approve_screenshot():
     try:
+        platform = request.json.get('platform')
         data = {
         'img_link' : request.json['img_url'],
         'user_id' : request.json['user_id'],
         'campaign_id' : int(request.json['campaign_id']),
         'product_url' : request.json.get('product_url', ''),
-        'real_time': True
+        'real_time': True,
+        'platform': platform
         }
         ex_da = {}
-        platform = request.json.get('platform')
         if platform == 'amazon':
             ex_da = read_image(**data)
         else:

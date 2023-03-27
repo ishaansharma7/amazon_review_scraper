@@ -4,7 +4,7 @@ import traceback
 import json
 
 
-def read_image(filename=None, img_link=None, product_url='', user_id=None,campaign_id=1000, real_time=False):
+def read_image(filename=None, img_link=None, product_url='', user_id=None,campaign_id=1000, real_time=False, platform=''):
     
     # extracted data
     ex_da = {
@@ -24,6 +24,7 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
         'campaign_id': campaign_id,
         'review_date': None,
         'user_id': user_id,
+        'platform': platform,
         'reason':''
     }
     try:
