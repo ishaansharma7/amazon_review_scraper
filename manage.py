@@ -23,8 +23,8 @@ def func_test_cmd():
    live_campaigns_list()
 
 
-@application.cli.command('test_job')
-def test_job():
+@application.cli.command('amazon_scrape_job')
+def amazon_sc_job():
    amazon_scrape_job()
 
 
