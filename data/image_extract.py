@@ -2,6 +2,7 @@ from utils.ocr_utils import prepare_image, clean_extracted_text, extract_data, m
 import pytesseract
 import traceback
 import json
+import time
 
 
 def read_image(filename=None, img_link=None, product_url='', user_id=None,campaign_id=1000, real_time=False, platform=''):
@@ -28,13 +29,20 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
         'reason':''
     }
     try:
+        t1 = time.time()
         image, success = prepare_image(filename, img_link)
+        print('prepare_image time taken---', round(time.time()-t1,4))
         if not success:   return ex_da
 
+        t1 = time.time()
         data_eng = pytesseract.image_to_string(image, lang='eng')
         data_eng = clean_extracted_text(data_eng)
+        print('data_eng time taken---', round(time.time()-t1,4))
 
+        t1 = time.time()
         extract_data(data_eng, ex_da)
+        print('extract_data time taken---', round(time.time()-t1,4))
+
         if ex_da['review_title'] != None and ex_da['review_text'] != None and not real_time:
             print('db match ---')
             match_from_db(ex_da)
