@@ -85,7 +85,7 @@ def extract_data(data_eng, ex_da):
     ex_da['delete_button'] = True if 'Edit Delete' in data_eng else False
     ex_da['ocr_success'] = True
     # verification not yet done with database
-    ex_da['reason'] = {'code': '4', 'msg': 'Unverified amazon review'}
+    ex_da['reason'] = {'code': '5', 'msg': 'Unverified amazon review'}
 
 
 def get_review_date(in_india_idx, line_list):
@@ -170,19 +170,23 @@ def initial_keyword_check(data_eng, ex_da):
     
     # uploaded review of someone else
     elif 'helpful' in data_eng and 'report' in data_eng and 'thank you for your review' not in data_eng:
-        ex_da['reason'] = {'code': '0', 'msg': 'Please upload your own amazon review screenshot'}
+        ex_da['reason'] = {'code': '0', 'msg': 'Please upload a screenshot of your own review'}
+    
+    # uploaded review of someone else
+    elif 'verified purchase' in data_eng and 'reviewed in india' in data_eng and 'thank you for your review' not in data_eng:
+        ex_da['reason'] = {'code': '1', 'msg': 'Please make sure your entire review is visible'}
     
     # uploaded review from profile section in amazon app
     elif 'reviewed a product' in data_eng and 'verified purchase' in data_eng and 'see full review' in data_eng:
-        ex_da['reason'] = {'code': '1', 'msg': 'Please click on see full review and then provide the screenshot'}
+        ex_da['reason'] = {'code': '2', 'msg': "Please click on 'See full review' and submit a screenshot of your entire review"}
     
     # uploaded Email screenshot
     elif 'your latest customer review is live on amazon' in data_eng and 'thanks' in data_eng :
-        ex_da['reason'] = {'code': '2', 'msg': 'Please click on see your full review and then provide the screenshot from amazon app'}
+        ex_da['reason'] = {'code': '3', 'msg': 'Please take a screenshot of your review from the Amazon app. Make sure your entire review is visible'}
     
     # uploaded rubbish image
     else:
-        ex_da['reason'] = {'code': '3', 'msg': 'Please upload only amazon review screenshot'}
+        ex_da['reason'] = {'code': '4', 'msg': 'The screenshot you are submitting is incorrect. Please upload a screenshot of your review'}
     return False
 
 

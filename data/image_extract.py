@@ -5,11 +5,10 @@ import json
 import time
 
 
-def read_image(filename=None, img_link=None, product_url='', user_id=None,campaign_id=1000, real_time=False, platform=''):
+def read_image(filename=None, img_link=None, user_id=None,campaign_id=1000, real_time=False, platform=''):
     
     # extracted data
     ex_da = {
-        'product_url': product_url,
         'reviewer_name': None,
         'review_title': None,
         'review_text': None,
@@ -29,19 +28,13 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
         'reason':''
     }
     try:
-        t1 = time.time()
         image, success = prepare_image(filename, img_link)
-        print('prepare_image time taken---', round(time.time()-t1,4))
         if not success:   return ex_da
 
-        t1 = time.time()
         data_eng = pytesseract.image_to_string(image, lang='eng')
         data_eng = clean_extracted_text(data_eng)
-        print('data_eng time taken---', round(time.time()-t1,4))
 
-        t1 = time.time()
         extract_data(data_eng, ex_da)
-        print('extract_data time taken---', round(time.time()-t1,4))
 
         if ex_da['review_title'] != None and ex_da['review_text'] != None and not real_time:
             print('db match ---')
@@ -49,7 +42,7 @@ def read_image(filename=None, img_link=None, product_url='', user_id=None,campai
 
         ex_da['valid_review'] = True if ex_da['ocr_success'] and ex_da['found_rec'] else False
         if ex_da['valid_review']:
-            ex_da['reason'] = {'code': '5', 'msg': 'Authentic amazon review'}
+            ex_da['reason'] = {'code': '6', 'msg': 'Authentic amazon review'}
         print('\n\n\n\n')
         print(json.dumps(ex_da, indent=5))
         print('###############################')

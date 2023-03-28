@@ -21,7 +21,6 @@ def approve_screenshot():
         'img_link' : request.json['img_url'],
         'user_id' : request.json['user_id'],
         'campaign_id' : int(request.json['campaign_id']),
-        'product_url' : request.json.get('product_url', ''),
         'real_time': True,
         'platform': platform
         }
